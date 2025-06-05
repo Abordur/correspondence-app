@@ -1,23 +1,17 @@
 import streamlit as st
-import os   #Interagi avec le système de fichiers
-import pandas as pd     #Biblio pour manip les fichiers excel
+import pandas as pd    #Biblio pour manip les fichiers excel
+from supabase import create_client, Client 
+ 
 
-# Chargement du fichier Excel une seule fois
-@st.cache_data   #Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
-def load_data():  #fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
-    folder_path = "data"  # le dossier contenant tous les fichiers Excel
-    all_dataframes = []
-
-    for file in os.listdir(folder_path):
-        if file.endswith(".xlsx"):
-            file_path = os.path.join(folder_path, file)
-            print(f"Chargement du fichier : {file}")  # Affiche dans la console
-            df = pd.read_excel(file_path)
-            all_dataframes.append(df)
-
-    # Fusionner tous les fichiers en un seul DataFrame
-    combined_df = pd.concat(all_dataframes, ignore_index=True)
-    return combined_df
+@st.cache_data #Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
+def load_data(): #fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
+    url = "https://pkfzbsfjcrjtkbrtqiis.supabase.co" # URL Supabase et la clé publique (anon) ->
+    key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrZnpic2ZqY3JqdGticnRxaWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTg0NzcsImV4cCI6MjA2Mzk5NDQ3N30.YGR7YBD0LrljuXVtBf427ug92jtHuqBFUAxhK_fZv7Q"  
+    supabase: Client = create_client(url, key)  # Crée le client Supabase
+    response = supabase.table("Correspondence").select("*").execute()  # Change "Correspondence" si le tableau a un autre nom
+    data = response.data  # Données brutes (liste de dictionnaires)
+    df = pd.DataFrame(data)  # Transforme en DataFrame
+    return df
 
 
 df = load_data()
