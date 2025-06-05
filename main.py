@@ -1,3 +1,4 @@
+# ✅ Code mis à jour le 5 juin 15h21 pour corriger erreur Streamlit Cloud
 import streamlit as st
 import pandas as pd    #Biblio pour manip les fichiers excel
 from supabase import create_client, Client 
@@ -15,6 +16,9 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
 
 
 df = load_data()
+st.write("Données chargées :", df)
+st.write("Colonnes détectées dans la base :", df.columns.tolist())
+
 
 # Interface Streamlit
 st.title("Correspondence table")
