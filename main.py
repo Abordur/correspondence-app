@@ -16,9 +16,6 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
 
 
 df = load_data()
-st.write("Données chargées :", df)
-st.write("Colonnes détectées dans la base :", df.columns.tolist())
-
 
 # Interface Streamlit
 st.title("Correspondence table")
