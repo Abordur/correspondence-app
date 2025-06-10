@@ -24,7 +24,7 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
             df = pd.read_excel(BytesIO(stream.readall()))
             all_dfs.append(df)
             st.write("Found Excel file:", blob.name)
-            
+
     final_df = pd.concat(all_dfs, ignore_index=True)
     return final_df
 
@@ -32,7 +32,7 @@ df = load_data()
 
 # Interface Streamlit
 st.title("Correspondence table")
-st.markdown("AAAAAAAPlease select a method to retrieve the new " \
+st.markdown("Please select a method to retrieve the new " \
 "Sharepoint link of your file. " \
 "You can search by Name, ID or URL. ", unsafe_allow_html=True)
 
