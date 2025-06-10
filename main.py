@@ -19,9 +19,9 @@ df = load_data()
 
 # Interface Streamlit
 st.title("Correspondence table")
-st.markdown("Choisissez une méthode pour retrouver le nouveau lien Microsoft " \
-"SharePoint à partir d’un lien Google Drive, " \
-"d’un nom de fichier ou d’un ID.", unsafe_allow_html=True)
+st.markdown("Please select a method to retrieve the new " \
+"Sharepoint link of your file." \
+"You can search by Name, ID or URL. ", unsafe_allow_html=True)
 
 # Initialiser les états
 if "mode_selection" not in st.session_state:
@@ -47,19 +47,19 @@ with col3:
 # Saisie utilisateur
 user_input = None
 if st.session_state.mode_selection == "name":
-    user_input = st.text_input("Entrez le **nom** du fichier :", key="user_input")
+    user_input = st.text_input("Please enter the **name** of your file  :", key="user_input")
     column_to_search = "FileName"
 elif st.session_state.mode_selection == "link":
-    user_input = st.text_input("Entrez le **lien Google Drive** du fichier :", key="user_input")
+    user_input = st.text_input("Please enter the **Google link** of your file :", key="user_input")
     column_to_search = "PathGoogle"
 elif st.session_state.mode_selection == "id":
-    user_input = st.text_input("Entrez l’**ID du lien** Google Drive :", key="user_input")
+    user_input = st.text_input("Please enter the **ID** of your file :", key="user_input")
     column_to_search = "FileID"
 
 # Traitement après saisie
 if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ alors:
 
-    if st.button("Convertir"): # Bouton Convertir apparaît
+    if st.button("Search"): # Bouton Convertir apparaît
 
         matches = df[df[column_to_search] == user_input.strip()] # Elle cherche dans le fichier 
             # Excel (df) toutes les lignes où la colonne column_to_search contient exactement ce 
@@ -69,10 +69,10 @@ if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ
             row = matches.iloc[0] # Récupère la première ligne de la colonne 
             link = row["LinkSharepoint"]
             path = row["PathSharepoint"]
-            st.markdown(f"**Lien Microsoft :** <a href='{link}'>{link}</a>", unsafe_allow_html=True)
-            st.markdown(f"**Chemin SharePoint :** `{path}`")
+            st.markdown(f"**Microsoft link :** <a href='{link}'>{link}</a>", unsafe_allow_html=True)
+            st.markdown(f"**SharePoint path :** `{path}`")
         else:
-            st.error("Aucun fichier correspondant trouvé dans la base.")
+            st.error("No file found. Please try again or contact IT support team.")
 
 
 
