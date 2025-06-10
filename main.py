@@ -1,26 +1,39 @@
 # ✅ Code mis à jour le 5 juin 15h21 pour corriger erreur Streamlit Cloud
 import streamlit as st
 import pandas as pd    #Biblio pour manip les fichiers excel
-from supabase import create_client, Client 
+#from supabase import create_client, Client 
+from azure.storage.blob import BlobServiceClient
+from io import BytesIO
  
 
 @st.cache_data #Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
 def load_data(): #fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
-    url = "https://pkfzbsfjcrjtkbrtqiis.supabase.co" # URL Supabase et la clé publique (anon) ->
-    key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrZnpic2ZqY3JqdGticnRxaWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTg0NzcsImV4cCI6MjA2Mzk5NDQ3N30.YGR7YBD0LrljuXVtBf427ug92jtHuqBFUAxhK_fZv7Q"  
-    supabase: Client = create_client(url, key)  # Crée le client Supabase
-    response = supabase.table("Correspondence").select("*").execute()  # Change "Correspondence" si le tableau a un autre nom
-    data = response.data  # Données brutes (liste de dictionnaires)
-    df = pd.DataFrame(data)  # Transforme en DataFrame
-    return df
+    connect_str = st.secrets["AZURE_STORAGE_CONNECTION_STRING"]
+    container_name = st.secrets["AZURE_CONTAINER_NAME"]
 
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    container_client = blob_service_client.get_container_client(container_name)
+
+    all_dfs = []
+
+    #Liste tous les blob
+    for blob in container_client.list_blobs():
+        if blob.name.endswith(".xlsx"):
+            blob_client = container_client.get_blob_client(blob)
+            stream = blob_client.download_blob()
+            df = pd.read_excel(BytesIO(stream.readall()))
+            all_dfs.append(df)
+            st.write("Found Excel file:", blob.name)
+            
+    final_df = pd.concat(all_dfs, ignore_index=True)
+    return final_df
 
 df = load_data()
 
 # Interface Streamlit
 st.title("Correspondence table")
-st.markdown("Please select a method to retrieve the new " \
-"Sharepoint link of your file." \
+st.markdown("AAAAAAAPlease select a method to retrieve the new " \
+"Sharepoint link of your file. " \
 "You can search by Name, ID or URL. ", unsafe_allow_html=True)
 
 # Initialiser les états
@@ -78,3 +91,12 @@ if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ
 
 
 #La commande pour lancer l'app c'est streamlit run main.py
+
+#Code pour Supabase
+    #url = "https://pkfzbsfjcrjtkbrtqiis.supabase.co" # URL Supabase et la clé publique (anon) ->
+    #key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrZnpic2ZqY3JqdGticnRxaWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTg0NzcsImV4cCI6MjA2Mzk5NDQ3N30.YGR7YBD0LrljuXVtBf427ug92jtHuqBFUAxhK_fZv7Q"  
+    #supabase: Client = create_client(url, key)  # Crée le client Supabase
+    #response = supabase.table("Correspondence").select("*").execute()  # Change "Correspondence" si le tableau a un autre nom
+    #data = response.data  # Données brutes (liste de dictionnaires)
+    #df = pd.DataFrame(data)  # Transforme en DataFrame 
+    #return df
