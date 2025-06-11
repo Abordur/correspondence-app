@@ -4,7 +4,6 @@ import pandas as pd    #Biblio pour manip les fichiers excel
 #from supabase import create_client, Client 
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
- 
 
 @st.cache_data #Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
 def load_data(): #fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
@@ -23,12 +22,12 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
             stream = blob_client.download_blob()
             df = pd.read_excel(BytesIO(stream.readall()))
             all_dfs.append(df)
-            st.write("Found Excel file:", blob.name)
 
     final_df = pd.concat(all_dfs, ignore_index=True)
     return final_df
 
 df = load_data()
+
 
 # Interface Streamlit
 st.title("Correspondence table")
@@ -51,11 +50,11 @@ def select_mode(mode):
 # Les 3 boutons de choix
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.button("Name File", on_click=select_mode, args=("name",))
+    st.button("🔍 Name File", on_click=select_mode, args=("name",))
 with col2:
-    st.button("Link File", on_click=select_mode, args=("link",))
+    st.button("🔗 Link File", on_click=select_mode, args=("link",))
 with col3:
-    st.button("ID File", on_click=select_mode, args=("id",))
+    st.button("🆔 ID File", on_click=select_mode, args=("id",))
 
 # Saisie utilisateur
 user_input = None
@@ -87,7 +86,11 @@ if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ
         else:
             st.error("No file found. Please try again or contact IT support team.")
 
+st.markdown("---")
 
+feedback = st.text_input("💬 Have feedback or suggestions?")
+if st.button("Send feedback"):
+    st.success("✅ Thanks! Your feedback has been received.")
 
 
 #La commande pour lancer l'app c'est streamlit run main.py
