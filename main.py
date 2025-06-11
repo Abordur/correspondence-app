@@ -69,10 +69,9 @@ elif st.session_state.mode_selection == "id":
     column_to_search = "FileID"
 
 # Traitement après saisie
-if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ alors:
 
-    if st.button("Search"): # Bouton Convertir apparaît
-
+if st.session_state.mode_selection and st.button("Search"):
+    if user_input.strip() != "":
         matches = df[df[column_to_search] == user_input.strip()] # Elle cherche dans le fichier 
             # Excel (df) toutes les lignes où la colonne column_to_search contient exactement ce 
             # que l'utilisateur a tapé (user_input.strip()).
