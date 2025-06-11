@@ -86,11 +86,6 @@ if user_input and user_input.strip() != "": # Si il y a une valeur dans le champ
         else:
             st.error("No file found. Please try again or contact IT support team.")
 
-st.markdown("---")
-
-feedback = st.text_input("💬 Have feedback or suggestions?")
-if st.button("Send feedback"):
-    st.success("✅ Thanks! Your feedback has been received.")
 
 
 #La commande pour lancer l'app c'est streamlit run main.py
