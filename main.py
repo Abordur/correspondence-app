@@ -72,7 +72,7 @@ elif st.session_state.mode_selection == "id":
 
 if st.session_state.mode_selection and st.button("Search"):
     if user_input.strip() != "":
-        matches = df[df[column_to_search] == user_input.strip()] # Elle cherche dans le fichier 
+        matches = df[user_input.strip() in df[column_to_search]] # Elle cherche dans le fichier 
             # Excel (df) toutes les lignes où la colonne column_to_search contient exactement ce 
             # que l'utilisateur a tapé (user_input.strip()).
 
