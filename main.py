@@ -1,4 +1,3 @@
-# ✅ Code mis à jour le 5 juin 15h21 pour corriger erreur Streamlit Cloud
 import streamlit as st
 import pandas as pd    #Biblio pour manip les fichiers excel
 #from supabase import create_client, Client 
@@ -70,20 +69,30 @@ elif st.session_state.mode_selection == "id":
 
 # Traitement après saisie
 
+# Traitement après saisie
 if st.session_state.mode_selection and st.button("Search"):
     if user_input.strip() != "":
-        matches = df[user_input.strip() in df[column_to_search]] # Elle cherche dans le fichier 
-            # Excel (df) toutes les lignes où la colonne column_to_search contient exactement ce 
-            # que l'utilisateur a tapé (user_input.strip()).
+        user_input_clean = user_input.strip().lower()
+        search_series = df[column_to_search].astype(str).str.lower()
 
-        if not matches.empty: # Si matches à une valeur alors:
-            row = matches.iloc[0] # Récupère la première ligne de la colonne 
-            link = row["LinkSharepoint"]
-            path = row["PathSharepoint"]
-            st.markdown(f"**Microsoft link :** <a href='{link}'>{link}</a>", unsafe_allow_html=True)
-            st.markdown(f"**SharePoint path :** `{path}`")
+        matches = df[search_series.str.contains(user_input_clean, na=False)]
+
+        if len(matches) >= 15:
+            st.warning("❗Le terme est trop général, veuillez affiner votre recherche.")
+        elif not matches.empty:
+            st.success(f"✅ {len(matches)} fichier(s) trouvé(s) :")
+            for index, row in matches.iterrows():
+                filename = row.get("FileName", "Nom inconnu")
+                link = row.get("LinkSharepoint", "#")
+                path = row.get("PathSharepoint", "Chemin inconnu")
+
+                st.markdown(f"**{filename}**")
+                st.markdown(f"- 🔗 [Lien Microsoft]({link})")
+                st.markdown(f"- 📁 Chemin SharePoint : `{path}`")
+                st.markdown("---")
         else:
-            st.error("No file found. Please try again or contact IT support team.")
+            st.error("Aucun fichier trouvé. Veuillez essayer avec un autre terme.")
+
 
 
 
