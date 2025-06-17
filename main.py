@@ -45,11 +45,11 @@ def select_mode(mode):
 # Les 3 boutons de choix
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.button("🔍 Search by Name", on_click=select_mode, args=("name",))
+    st.button("🔍 Name File", on_click=select_mode, args=("name",))
 with col2:
-    st.button("🔗 Search by Google Link", on_click=select_mode, args=("link",))
+    st.button("🔗 Google File", on_click=select_mode, args=("link",))
 with col3:
-    st.button("🆔 Search by ID", on_click=select_mode, args=("id",))
+    st.button("🆔 ID File", on_click=select_mode, args=("id",))
 
 # Saisie utilisateur
 user_input = None
