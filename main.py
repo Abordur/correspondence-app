@@ -29,10 +29,8 @@ df = load_data()
 
 
 # Interface Streamlit
-st.title("Correspondence table")
-st.markdown("Please select a method to retrieve the new " \
-"Sharepoint link of your file. " \
-"You can search by Name, ID or URL. ", unsafe_allow_html=True)
+st.title("Correspondence Table")  # Correction de la casse
+st.markdown("Please select a method to search for the new SharePoint link of your file. You can search by Name, ID, or Google Path.", unsafe_allow_html=True)
 
 # Initialiser les états
 if "mode_selection" not in st.session_state:
@@ -49,11 +47,11 @@ def select_mode(mode):
 # Les 3 boutons de choix
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.button("🔍 Name File", on_click=select_mode, args=("name",))
+    st.button("🔍 Search by Name", on_click=select_mode, args=("name",))
 with col2:
-    st.button("🔗 Link File", on_click=select_mode, args=("link",))
+    st.button("🔗 Search by Google Link", on_click=select_mode, args=("link",))
 with col3:
-    st.button("🆔 ID File", on_click=select_mode, args=("id",))
+    st.button("🆔 Search by ID", on_click=select_mode, args=("id",))
 
 # Saisie utilisateur
 user_input = None
@@ -75,23 +73,23 @@ if st.session_state.mode_selection and st.button("Search"):
         user_input_clean = user_input.strip().lower()
         search_series = df[column_to_search].astype(str).str.lower()
 
-        matches = df[search_series.str.contains(user_input_clean, na=False)]
+        matches = df[search_series.str.contains(user_input_clean, na=False)     ]
 
         if len(matches) >= 15:
-            st.warning("❗Le terme est trop général, veuillez affiner votre recherche.")
+            st.warning("⚠️ Too many results. Please refine your search.")
         elif not matches.empty:
-            st.success(f"✅ {len(matches)} fichier(s) trouvé(s) :")
+            st.success(f"✅ {len(matches)} file(s) found:")
             for index, row in matches.iterrows():
                 filename = row.get("FileName", "Nom inconnu")
                 link = row.get("LinkSharepoint", "#")
                 path = row.get("PathSharepoint", "Chemin inconnu")
 
                 st.markdown(f"**{filename}**")
-                st.markdown(f"- 🔗 [Lien Microsoft]({link})")
-                st.markdown(f"- 📁 Chemin SharePoint : `{path}`")
+                st.markdown(f"- 🔗 [Microsoft Link]({link})")
+                st.markdown(f"- 📁 SharePoint Path: `{path}`")
                 st.markdown("---")
         else:
-            st.error("Aucun fichier trouvé. Veuillez essayer avec un autre terme.")
+            st.error("❌ No file found. Please try a different term.")
 
 
 
@@ -106,3 +104,5 @@ if st.session_state.mode_selection and st.button("Search"):
     #data = response.data  # Données brutes (liste de dictionnaires)
     #df = pd.DataFrame(data)  # Transforme en DataFrame 
     #return df
+
+
