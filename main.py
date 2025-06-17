@@ -1,11 +1,11 @@
 import streamlit as st
-import pandas as pd    #Biblio pour manip les fichiers excel
-#from supabase import create_client, Client 
+import pandas as pd    # Biblio pour manip les fichiers Excel
+import re               # Biblio pour utiliser les expressions régulières (permet d'extraire l'ID d'un lien Google)
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 
-@st.cache_data #Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
-def load_data(): #fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
+@st.cache_data  # Permet à Streamlit de ne pas recharger les fichiers Excel à chaque fois
+def load_data():  # Fonction qui va charger et retourner tous les fichiers Excel en un seul DataFrame.
     connect_str = st.secrets["AZURE_STORAGE_CONNECTION_STRING"]
     container_name = st.secrets["AZURE_CONTAINER_NAME"]
 
@@ -14,7 +14,7 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
 
     all_dfs = []
 
-    #Liste tous les blob
+    # Liste tous les blobs
     for blob in container_client.list_blobs():
         if blob.name.endswith(".xlsx"):
             blob_client = container_client.get_blob_client(blob)
@@ -27,9 +27,8 @@ def load_data(): #fonction qui va charger et retourner tous les fichiers Excel e
 
 df = load_data()
 
-
 # Interface Streamlit
-st.title("Correspondence Table")  # Correction de la casse
+st.title("Correspondence Table")
 st.markdown("Please select a method to search for the new SharePoint link of your file. You can search by Name, ID, or Google Path.", unsafe_allow_html=True)
 
 # Initialiser les états
@@ -37,7 +36,6 @@ if "mode_selection" not in st.session_state:
     st.session_state.mode_selection = None
 if "user_input" not in st.session_state:
     st.session_state.user_input = ""
-
 
 # Fonction pour gérer le clic sur un bouton
 def select_mode(mode):
@@ -65,16 +63,31 @@ elif st.session_state.mode_selection == "id":
     user_input = st.text_input("Please enter the **ID** of your file :", key="user_input")
     column_to_search = "FileID"
 
-# Traitement après saisie
+# Fonction utilitaire pour extraire l'ID d'un lien Google Sheets ou Drive
+def extract_google_file_id(link):
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", link)
+    if match:
+        return match.group(1)
+    return None
 
 # Traitement après saisie
 if st.session_state.mode_selection and st.button("Search"):
     if user_input.strip() != "":
         user_input_clean = user_input.strip().lower()
-        search_series = df[column_to_search].astype(str).str.lower()
 
-        matches = df[search_series.str.contains(user_input_clean, na=False)     ]
+        # Recherche spécifique pour les liens Google
+        if st.session_state.mode_selection == "link":
+            extracted_id = extract_google_file_id(user_input_clean)
+            if extracted_id:
+                search_series = df["PathGoogle"].astype(str).str.lower()
+                matches = df[search_series.str.contains(extracted_id, na=False)]
+            else:
+                matches = pd.DataFrame()  # Aucun ID détecté dans le lien entré
+        else:
+            search_series = df[column_to_search].astype(str).str.lower()
+            matches = df[search_series.str.contains(user_input_clean, na=False)]
 
+        # Affichage des résultats
         if len(matches) >= 15:
             st.warning("⚠️ Too many results. Please refine your search.")
         elif not matches.empty:
@@ -90,19 +103,3 @@ if st.session_state.mode_selection and st.button("Search"):
                 st.markdown("---")
         else:
             st.error("❌ No file found. Please try a different term.")
-
-
-
-
-#La commande pour lancer l'app c'est streamlit run main.py
-
-#Code pour Supabase
-    #url = "https://pkfzbsfjcrjtkbrtqiis.supabase.co" # URL Supabase et la clé publique (anon) ->
-    #key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrZnpic2ZqY3JqdGticnRxaWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTg0NzcsImV4cCI6MjA2Mzk5NDQ3N30.YGR7YBD0LrljuXVtBf427ug92jtHuqBFUAxhK_fZv7Q"  
-    #supabase: Client = create_client(url, key)  # Crée le client Supabase
-    #response = supabase.table("Correspondence").select("*").execute()  # Change "Correspondence" si le tableau a un autre nom
-    #data = response.data  # Données brutes (liste de dictionnaires)
-    #df = pd.DataFrame(data)  # Transforme en DataFrame 
-    #return df
-
-
